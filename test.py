@@ -1,7 +1,10 @@
 from FireflyAPI.init import *
+import sys
 from datetime import datetime
-#api = UserIntegration("WESTMINSTER","w4dffpmrandomrandom4cjwpb", integration_name="FF API TEST").createIntegration()
-ab_file = open("FireflyAPI/my_auth_blob.txt", 'r')
+#api = UserIntegration("WESTMINSTER","kh2n1srandomrandomejjewj4", integration_name="FF API TEST2").createIntegration()
+#print(api.auth_blob)
+#sys.exit()
+ab_file = open("my_auth_blob.txt", 'r')
 my_ab = ab_file.read()
 ab_file.close()
 api = AuthenticatedUser(my_ab)
@@ -13,10 +16,10 @@ print(api.auth_blob)
 #for lesson in lessons:
     #print(lesson.start)
 hw = api.getTaskInterface()
-tasks = hw.getTasks(TaskInterfaceFilter("Todo"))
-task = tasks[2]
-print(task.canMarkAsDone())
-print(task.title)
+tasks = hw.getTasks(TaskInterfaceFilter("AllIncludingArchived"))
+#task = tasks[2]
+#print(task.canMarkAsDone())
+#print(task.title)
 #task.markAsDone()
 for task in tasks:
     print(task)

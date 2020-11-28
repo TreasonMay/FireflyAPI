@@ -58,15 +58,25 @@ class TaskInterface:
         cookies = {"ASP.NET_SessionId": session}
         response = requests.post(self.__portal + "/api/v2/taskListing/view/student/tasks/all/filterBy",
                                cookies=cookies, json=filter.filter, headers=headers)
-        print(response.text)
         tasks_data = json.loads(response.text)["items"]
-        tasks = []
+        task_ids = []
         for task_data in tasks_data:
-            tasks.append(Task(self.__auth_blob, task_data, False))
-        return tasks
+            task_ids.append(int(task_data["id"]))
+        return self.__getTasksFromIds(task_ids)
+    def __getTasksFromIds(self, ids):
+        params = {"ffauth_device_id": self.__device_id,
+                  "ffauth_secret": self.__device_token}
+        json_data = {"ids":ids}
+        response = requests.post(self.__portal + "/api/v2/apps/tasks/byIds", params=params, data=json_data)
+        tasks_data = json.loads(response.text)
+        print(response.text)
+        return None
+    def __proccessEvents(self, events, watermark = None):
+        for event in events:
+            TODO
 
 class Task:
-    def __init__(self, auth_blob, task_data, detailed):
+    def __init__(self, auth_blob, task_data):
         self.__auth_blob = auth_blob
         auth_data = Utils.unpackAuthBlob(auth_blob)
         self.__device_id = auth_data["device_id"]
@@ -74,19 +84,17 @@ class Task:
         self.__portal = auth_data["portal"]
         self.__guid = auth_data["guid"]
         # Unpack homework data
-        self.detailed = detailed
-        if not detailed:
-            self.__load_undetailed_task(task_data)
-    def __load_undetailed_task(self, task_data):
+        self.__load_task_details(task_data)
+    def __load_task_details(self, task_data):
         self.id = int(task_data["id"])
         self.title = task_data["title"]
-        self.set_date = datetime.datetime.strptime(task_data["setDate"], "%Y-%m-%d")
-        if not task_data["isMissingDueDate"]:
-            self.due_date = datetime.datetime.strptime(task_data["dueDate"], "%Y-%m-%d")
-        else:
+        self.set_date = Utils.fireflyTimestampToDateTime(task_data["setDate"])
+        # Due date could be missing if not specified
+        try:
+            self.due_date = Utils.fireflyTimestampToDateTime(task_data["dueDate"])
+        except:
             self.due_date = None
-        self.personal_task = task_data["isPersonalTask"]
-        self.excused = task_data["isExcused"]
+        self.personal_task = (task_data["taskType"] == "PersonalTask")
         self.done = task_data["isDone"]
         self.resubmission_required = task_data["isResubmissionRequired"]
         self.archived = task_data["archived"]

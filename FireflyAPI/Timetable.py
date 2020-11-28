@@ -1,5 +1,6 @@
 import datetime, json, requests, pytz
 from base64 import b64decode
+from FireflyAPI import Utils
 class Timetable:
     '''
     The Timetable class is used to get information about lessons.
@@ -59,13 +60,8 @@ class Lesson:
     '''
     def __init__(self, lesson_data):
         self.lesson_data = lesson_data
-        # Handle timezoning
-        tz = pytz.timezone('UTC')
-        london_tz = pytz.timezone('Europe/London')
-        self.start = datetime.datetime.strptime(lesson_data["start"], "%Y-%m-%dT%H:%M:%SZ")
-        self.start = tz.localize(self.start).astimezone(london_tz)
-        self.end = datetime.datetime.strptime(lesson_data["end"], "%Y-%m-%dT%H:%M:%SZ")
-        self.end = tz.localize(self.end).astimezone(london_tz)
+        self.start = Utils.fireflyTimestampToDateTime(lesson_data["start"])
+        self.end = Utils.fireflyTimestampToDateTime(lesson_data["end"])
         self.location = lesson_data["location"]
         self.subject = lesson_data["subject"]
         self.description = lesson_data["description"]

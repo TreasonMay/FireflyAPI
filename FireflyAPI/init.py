@@ -3,7 +3,7 @@ from base64 import b64encode
 import xml.etree.ElementTree as ET
 from FireflyAPI.Exceptions import *
 from FireflyAPI.Timetable import *
-from FireflyAPI.Homework import *
+from FireflyAPI.Tasks import *
 from FireflyAPI import Utils
 
 
