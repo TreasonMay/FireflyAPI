@@ -1,72 +1,103 @@
-from FireflyAPI import Utils
+import json
+import warnings
 from FireflyAPI import Files
-import warnings, json
+from FireflyAPI import Utils
+
+
 class TaskEvent:
     def __init__(self, event_data, is_student_event):
         self.read = event_data["latestRead"]
         self.edited = event_data["edited"]
         self.authorName = event_data["authorName"]
         self.eventReleased = event_data["released"]
-        self.releasedTime = Utils.fireflyTimestampToDateTime(event_data["releasedTimestamp"])
-        self.sentTime = Utils.fireflyTimestampToDateTime(event_data["sentTimeStamp"])
-        self.createdTime = Utils.fireflyTimestampToDateTime(event_data["createdTimestamp"])
+        self.releasedTime = Utils.firefly_timestamp_to_date_time(event_data["releasedTimestamp"])
+        self.sentTime = Utils.firefly_timestamp_to_date_time(event_data["sentTimeStamp"])
+        self.createdTime = Utils.firefly_timestamp_to_date_time(event_data["createdTimestamp"])
         self.is_student_event = is_student_event
+
+
 class SetTaskEvent(TaskEvent):
     pass
+
+
 class EditTaskEvent(TaskEvent):
     pass
+
+
 class ArchiveTaskEvent(TaskEvent):
     pass
+
+
 class UnarchiveTaskEvent(TaskEvent):
     pass
+
+
 class AddFileTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
-        TaskEvent.__init__(self,event_data, is_student_event)
+        TaskEvent.__init__(self, event_data, is_student_event)
         self.file = Files.File(event_data["file"])
+
+
 class CommentTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
         self.message = event_data["message"]
+
+
 class MarkAsDoneTaskEvent(TaskEvent):
     pass
+
+
 class MarkAsUndoneTaskEvent(TaskEvent):
     pass
+
+
 class MarkAndGradeTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
         self.message = event_data["message"]
         self.mark = None
-        if event_data["mark"] != None:
+        if event_data["mark"] is not None:
             self.mark = event_data["mark"]
         self.grade = None
-        if event_data["grade"] != None:
+        if event_data["grade"] is not None:
             self.grade = event_data["grade"]
+
+
 class RequestedResubmissionTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
         self.message = event_data["message"]
+
+
 class ConfirmCompletedTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
         self.message = event_data["message"]
+
+
 class ExcusedTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
         self.message = event_data["message"]
-event_types = {"set-task":SetTaskEvent,
-               "edit-task":EditTaskEvent,
-               "archive-task":ArchiveTaskEvent,
-               "unarchive-task":UnarchiveTaskEvent,
-               "add-file":AddFileTaskEvent,
-               "comment":CommentTaskEvent,
-               "mark-as-done":MarkAsDoneTaskEvent,
-               "mark-as-undone":MarkAsUndoneTaskEvent,
-               "mark-and-grade":MarkAndGradeTaskEvent,
-               "request-resubmission":RequestedResubmissionTaskEvent,
-               "confirm-task-is-complete":ConfirmCompletedTaskEvent,
-               "confirm-student-is-excused":ExcusedTaskEvent}
+
+
+event_types = {"set-task": SetTaskEvent,
+               "edit-task": EditTaskEvent,
+               "archive-task": ArchiveTaskEvent,
+               "unarchive-task": UnarchiveTaskEvent,
+               "add-file": AddFileTaskEvent,
+               "comment": CommentTaskEvent,
+               "mark-as-done": MarkAsDoneTaskEvent,
+               "mark-as-undone": MarkAsUndoneTaskEvent,
+               "mark-and-grade": MarkAndGradeTaskEvent,
+               "request-resubmission": RequestedResubmissionTaskEvent,
+               "confirm-task-is-complete": ConfirmCompletedTaskEvent,
+               "confirm-student-is-excused": ExcusedTaskEvent}
+
+
 class TaskEventStore:
-    '''
+    """
     The TaskEventStore Object stores events (such as a task being marked as done or being excused) related to a task.
     Attributes:
         events (array [TaskEvent Object]): An array of events that are related to the task.
@@ -78,11 +109,11 @@ class TaskEventStore:
         added_files (array [File Object]): An array of files that have been submitted.
     Raises:
         Warning.warning: A prompt to submit a task event that has not been seen before. Follow instructions in warning.
-    '''
+    """
     def __init__(self, events_data, account_guid):
         self.events = []
         self.done = False
-        #self.task_archived = False
+        # self.task_archived = False
         self.read = True
         self.has_file_submission = False
         self.grade = None
@@ -96,15 +127,15 @@ class TaskEventStore:
                 warnings.warn(f"\nPlease raise an issue on the FireflyAPI GitHub repository with the following text attached (please remove any personal data): \n {json.dumps(event, indent=4, sort_keys=True)}")
             else:
                 self.events.append(event_types[event["eventType"]](event, is_student_event))
-        self.events.sort(key=lambda event:event.createdTime)
+        self.events.sort(key=lambda event: event.createdTime)
         for task_event in self.events:
             if type(task_event) == MarkAsDoneTaskEvent or type(task_event) == ConfirmCompletedTaskEvent:
                 self.done = True
             elif type(task_event) == MarkAsUndoneTaskEvent:
                 self.done = False
-            #elif type(task_event) == ArchiveTaskEvent:
+            # elif type(task_event) == ArchiveTaskEvent:
             #    self.task_archived = True
-            #elif type(task_event) == UnarchiveTaskEvent:
+            # elif type(task_event) == UnarchiveTaskEvent:
             #    self.task_archived = False
             elif type(task_event) == AddFileTaskEvent:
                 self.added_files.append(task_event.file)
