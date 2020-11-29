@@ -12,5 +12,12 @@ def getSessionToken(auth_blob):
 def unpackAuthBlob(auth_blob):
     return json.loads(b64decode(auth_blob))
 def fireflyTimestampToDateTime(timestamp):
-    converted = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
-    return tz.localize(converted).astimezone(london_tz)
+    formats = ["%Y-%m-%dT%H:%M:%SZ",
+               "%Y-%m-%dT%H:%M:%S",
+               "%Y-%m-%dT%H:%M:%S.%fZ"]
+    for format in formats:
+        try:
+            converted = datetime.datetime.strptime(timestamp, format)
+            return tz.localize(converted).astimezone(london_tz)
+        except ValueError:
+            pass

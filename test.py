@@ -16,7 +16,7 @@ print(api.auth_blob)
 #for lesson in lessons:
     #print(lesson.start)
 hw = api.getTaskInterface()
-tasks = hw.getTasks(TaskInterfaceFilter("AllIncludingArchived"))
+tasks = hw.getTasks(TaskInterfaceFilter("AllIncludingArchived",results=50))
 #task = tasks[2]
 #print(task.canMarkAsDone())
 #print(task.title)
