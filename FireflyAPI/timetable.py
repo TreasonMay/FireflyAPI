@@ -1,7 +1,7 @@
 import datetime
 import json
 import requests
-from FireflyAPI.Authentication import *
+from FireflyAPI.authentication import *
 
 
 class Timetable(DiscretelyAuthenticatedObject):
@@ -59,8 +59,8 @@ class Lesson:
     """
     def __init__(self, lesson_data):
         self.lesson_data = lesson_data
-        self.start = Utils.firefly_timestamp_to_date_time(lesson_data["start"])
-        self.end = Utils.firefly_timestamp_to_date_time(lesson_data["end"])
+        self.start = utils.firefly_timestamp_to_date_time(lesson_data["start"])
+        self.end = utils.firefly_timestamp_to_date_time(lesson_data["end"])
         self.location = lesson_data["location"]
         self.subject = lesson_data["subject"]
         self.description = lesson_data["description"]

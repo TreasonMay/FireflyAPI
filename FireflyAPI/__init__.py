@@ -1,10 +1,10 @@
 from base64 import b64encode
 import xml.etree.ElementTree as ET
-from FireflyAPI.Exceptions import *
-from FireflyAPI.Timetable import *
-from FireflyAPI.Tasks import *
-from FireflyAPI.Authentication import *
-from FireflyAPI import Utils
+from FireflyAPI.exceptions import *
+from FireflyAPI.timetable import *
+from FireflyAPI.tasks import *
+from FireflyAPI.authentication import *
+from FireflyAPI import utils
 
 
 class UserIntegration:
@@ -35,7 +35,7 @@ class UserIntegration:
 
     def create_integration(self):
         # Use the session cookie in order to authenticate as the user and generate login credentials for next time
-        device_id = Utils.generate_device_id()
+        device_id = utils.generate_device_id()
         data = {"ffauth_device_id": device_id,
                 "ffauth_secret": "",
                 "device_id": device_id,
@@ -71,4 +71,4 @@ class AuthenticatedUser(AuthenticatedObject):
         Returns:
             str: The ASP.NET_SessionID cookie.
         """
-        return Utils.get_session_token(self.auth_blob)
+        return utils.get_session_token(self.auth_blob)

@@ -1,4 +1,4 @@
-from FireflyAPI.init import *
+from FireflyAPI.__init__ import *
 import sys
 from datetime import datetime
 #api = UserIntegration("","kh2n1srandomrandomejjewj4", integration_name="FF API TEST2").createIntegration()

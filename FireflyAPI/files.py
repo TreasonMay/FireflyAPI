@@ -1,4 +1,4 @@
-from FireflyAPI import Utils
+from FireflyAPI import utils
 
 
 class File:
@@ -7,4 +7,4 @@ class File:
         self.fileName = file_data["fileName"]
         self.fileType = file_data["fileType"]
         self.etag = file_data["etag"]
-        self.date_created = Utils.firefly_timestamp_to_date_time(file_data["dateCreated"])
+        self.date_created = utils.firefly_timestamp_to_date_time(file_data["dateCreated"])

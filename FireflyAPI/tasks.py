@@ -1,8 +1,8 @@
 import json
 import requests
-from FireflyAPI import TaskEvents
-from FireflyAPI import Files
-from FireflyAPI.Authentication import *
+from FireflyAPI import task_events
+from FireflyAPI import files
+from FireflyAPI.authentication import *
 
 
 class TaskInterfaceFilter:
@@ -55,7 +55,7 @@ class TaskInterface(DiscretelyAuthenticatedObject):
                    "Origin": self._DiscretelyAuthenticatedObject__portal,
                    "Referer": self._DiscretelyAuthenticatedObject__portal + "/set-tasks"}
         # Get session token for authentication
-        session = Utils.get_session_token(self._DiscretelyAuthenticatedObject__auth_blob)
+        session = utils.get_session_token(self._DiscretelyAuthenticatedObject__auth_blob)
         cookies = {"ASP.NET_SessionId": session}
         response = requests.post(
             self._DiscretelyAuthenticatedObject__portal + "/api/v2/taskListing/view/student/tasks/all/filterBy",
@@ -111,14 +111,14 @@ class Task(DiscretelyAuthenticatedObject):
         self.__load_task_details(task_data)
 
     def __load_task_details(self, task_data):
-        self.event_store = TaskEvents.TaskEventStore(task_data["recipientsResponses"][0]["responses"],
-                                                     self._DiscretelyAuthenticatedObject__guid)
+        self.event_store = task_events.TaskEventStore(task_data["recipientsResponses"][0]["responses"],
+                                                      self._DiscretelyAuthenticatedObject__guid)
         self.id = int(task_data["id"])
         self.title = task_data["title"]
-        self.set_date = Utils.firefly_timestamp_to_date_time(task_data["setDate"])
+        self.set_date = utils.firefly_timestamp_to_date_time(task_data["setDate"])
         # Due date could be missing if not specified
         try:
-            self.due_date = Utils.firefly_timestamp_to_date_time(task_data["dueDate"])
+            self.due_date = utils.firefly_timestamp_to_date_time(task_data["dueDate"])
         except ValueError:
             self.due_date = None
         self.personal_task = (task_data["taskType"] == "PersonalTask")
@@ -139,7 +139,7 @@ class Task(DiscretelyAuthenticatedObject):
         self.file_attachments = []
         if task_data["fileAttachments"] is not None:
             for file in task_data["fileAttachments"]:
-                self.file_attachments.append(Files.File(file))
+                self.file_attachments.append(files.File(file))
 
     def can_mark_as_done(self):
         """

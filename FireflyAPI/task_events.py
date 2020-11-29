@@ -1,7 +1,7 @@
 import json
 import warnings
-from FireflyAPI import Files
-from FireflyAPI import Utils
+from FireflyAPI import files
+from FireflyAPI import utils
 
 
 class TaskEvent:
@@ -10,9 +10,9 @@ class TaskEvent:
         self.edited = event_data["edited"]
         self.authorName = event_data["authorName"]
         self.eventReleased = event_data["released"]
-        self.releasedTime = Utils.firefly_timestamp_to_date_time(event_data["releasedTimestamp"])
-        self.sentTime = Utils.firefly_timestamp_to_date_time(event_data["sentTimeStamp"])
-        self.createdTime = Utils.firefly_timestamp_to_date_time(event_data["createdTimestamp"])
+        self.releasedTime = utils.firefly_timestamp_to_date_time(event_data["releasedTimestamp"])
+        self.sentTime = utils.firefly_timestamp_to_date_time(event_data["sentTimeStamp"])
+        self.createdTime = utils.firefly_timestamp_to_date_time(event_data["createdTimestamp"])
         self.is_student_event = is_student_event
 
 
@@ -35,7 +35,7 @@ class UnarchiveTaskEvent(TaskEvent):
 class AddFileTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
-        self.file = Files.File(event_data["file"])
+        self.file = files.File(event_data["file"])
 
 
 class CommentTaskEvent(TaskEvent):
