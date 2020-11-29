@@ -1,3 +1,4 @@
 venv/
 .idea/
 my_auth_blob.txt
+.readthedocs.yaml
