@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="firefly-api",
+    name="FireflyAPI",
     version="0.0.1",
     author="TreasonMay",
     author_email="55131032+TreasonMay@users.noreply.github.com",
