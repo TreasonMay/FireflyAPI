@@ -57,16 +57,11 @@ class TaskInterface(DiscretelyAuthenticatedObject):
         Returns:
             array [Task Object]: An array of tasks that match the criteria of the filter specified.
         """
-        # These are needed for security reasons (to prevent click hijacking)
-        headers = {"Host": str(self._DiscretelyAuthenticatedObject__portal).split("/")[-1],
-                   "Origin": self._DiscretelyAuthenticatedObject__portal,
-                   "Referer": self._DiscretelyAuthenticatedObject__portal + "/set-tasks"}
-        # Get session token for authentication
-        session = utils.get_session_token(self._DiscretelyAuthenticatedObject__auth_blob)
-        cookies = {"ASP.NET_SessionId": session}
+        params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
+                  "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
         response = requests.post(
             self._DiscretelyAuthenticatedObject__portal + "/api/v2/taskListing/view/student/tasks/all/filterBy",
-            cookies=cookies, json=task_filter.filter, headers=headers)
+            params=params, json=task_filter.filter)
         tasks_data = json.loads(response.text)["items"]
         task_ids = []
         for task_data in tasks_data:
