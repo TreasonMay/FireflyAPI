@@ -72,3 +72,10 @@ class AuthenticatedUser(AuthenticatedObject):
             str: The ASP.NET_SessionID cookie.
         """
         return utils.get_session_token(self.auth_blob)
+
+    def get_messages(self):
+        """
+        This method gets all the messages you have been sent by your teachers.
+        Returns:
+            array [Message Object]: An array of messages.
+        """
