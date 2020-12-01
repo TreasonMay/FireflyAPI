@@ -4,6 +4,7 @@ from FireflyAPI.exceptions import *
 from FireflyAPI.timetable import *
 from FireflyAPI.tasks import *
 from FireflyAPI.authentication import *
+from FireflyAPI.messages import *
 from FireflyAPI import utils
 
 
@@ -79,3 +80,15 @@ class AuthenticatedUser(AuthenticatedObject):
         Returns:
             array [Message Object]: An array of messages.
         """
+        params = {"ffauth_device_id": self.device_id,
+                  "ffauth_secret": self.device_token}
+        data = {"data": str(
+            "query Query {users(guid: \"" + self.guid +"\") { messages { from { guid, name }, sent, archived, id, single_to { guid, name }, all_recipients, read, body } } }")}
+        response = requests.post(
+            self.portal + "/_api/1.0/graphql",
+            params=params, data=data)
+        messages_data = json.loads(response.text)["data"]["users"][0]["messages"]
+        messages = []
+        for message_data in messages_data:
+            messages.append(Message(self.auth_blob, message_data))
+        return messages
