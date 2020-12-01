@@ -1,5 +1,4 @@
 import FireflyAPI
-import datetime
 
 # Replace with your own Authentication Blob
 auth_blob = "eyJkZ...UwMSJ9"
@@ -33,4 +32,4 @@ for task in tasks:
         if not event.read:
             print(f"- {type(event)}, {event.createdTime}")
 
-# That should have printed out a list of 'events' that you haven't read yet (clicked on).
+# That should have printed out a list of 'events' that you haven't read (clicked on) yet.

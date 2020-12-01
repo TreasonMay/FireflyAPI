@@ -26,20 +26,21 @@ class TaskInterfaceFilter:
     def __update_filter(self):
         read_mapping = {None: "All", True: "OnlyRead", False: "OnlyUnread"}
         sort_order_mapping = {True: "Descending", False: "Ascending"}
-        self.filter = {
-            "ownerType": "OnlySetters",
-            "page": 0,
-            "pageSize": self.results,
-            "archiveStatus": "All",
-            "completionStatus": self.status,
-            "readStatus": read_mapping[self.read],
-            "markingStatus": "All",
-            "sortingCriteria": [{
-                "column": self.sorting[0],
-                "order": sort_order_mapping[self.sorting[1]]
-            }]
-        }
-
+        pages = (self.results - 1) // 50
+        self.filters = []
+        for page in range(0, pages + 1):
+            self.filters.append({
+                "ownerType": "OnlySetters",
+                "page": page,
+                "pageSize": min(self.results, 50),
+                "archiveStatus": "All",
+                "completionStatus": self.status,
+                "readStatus": read_mapping[self.read],
+                "markingStatus": "All",
+                "sortingCriteria": [{
+                    "column": self.sorting[0],
+                    "order": sort_order_mapping[self.sorting[1]]
+                }]})
 
 class TaskInterface(DiscretelyAuthenticatedObject):
     """
@@ -57,16 +58,22 @@ class TaskInterface(DiscretelyAuthenticatedObject):
         Returns:
             array [Task Object]: An array of tasks that match the criteria of the filter specified.
         """
-        params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
-                  "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
-        response = requests.post(
-            self._DiscretelyAuthenticatedObject__portal + "/api/v2/taskListing/view/student/tasks/all/filterBy",
-            params=params, json=task_filter.filter)
-        tasks_data = json.loads(response.text)["items"]
-        task_ids = []
-        for task_data in tasks_data:
-            task_ids.append(int(task_data["id"]))
-        return self.__get_tasks_from_ids(task_ids)
+        all_tasks = []
+        for page_filter in task_filter.filters:
+            params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
+                      "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
+            response = requests.post(
+                self._DiscretelyAuthenticatedObject__portal + "/api/v2/taskListing/view/student/tasks/all/filterBy",
+                params=params, json=page_filter)
+            tasks_data = json.loads(response.text)["items"]
+            task_ids = []
+            for task_data in tasks_data:
+                task_ids.append(int(task_data["id"]))
+            all_tasks += self.__get_tasks_from_ids(task_ids)
+            # Break if no more tasks are left to download.
+            if json.loads(response.text)["aggregateOffsets"]["toFfIndex"] < 50:
+                break
+        return all_tasks
 
     def __get_tasks_from_ids(self, ids):
         params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
@@ -179,7 +186,7 @@ class Task(DiscretelyAuthenticatedObject):
         completion_mapping = {True: "mark-as-done", False: "mark-as-undone"}
         params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
                   "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
-        data = {"data": str({"event": {"type": completion_mapping[done], "assessment_details_id": 0},
+        data = {"data": str({"event": {"type": completion_mapping[done], "assessment_details_id": self.__assessmentDetailsId},
                              "recipient": {"guid": self._DiscretelyAuthenticatedObject__guid, "type": "user"}})}
         response = requests.post(
             self._DiscretelyAuthenticatedObject__portal + "/_api/1.0/tasks/" + str(self.id) + "/responses",
@@ -187,6 +194,29 @@ class Task(DiscretelyAuthenticatedObject):
         if response.status_code != 200:
             return False
         return True
+    def mark_as_read(self):
+        """
+        Marks a task as read.
+        """
+        params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
+                  "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
+        data = {"data": str({"recipient": {"guid": self._DiscretelyAuthenticatedObject__guid, "type": "user"}})}
+        requests.post(
+            self._DiscretelyAuthenticatedObject__portal + "/_api/1.0/tasks/" + str(self.id) + "/mark_as_read",
+            params=params, data=data)
+    def add_comment(self, message):
+        """
+        Adds a comment to a task.
+        Args:
+            message (str): The comment message.
+        """
+        params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
+                  "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
+        data = {"data": str({"event": {"type": "comment", "message": message, "assessment_details_id": self.__assessmentDetailsId},
+                             "recipient": {"guid": self._DiscretelyAuthenticatedObject__guid, "type": "user"}})}
+        requests.post(
+            self._DiscretelyAuthenticatedObject__portal + "/_api/1.0/tasks/" + str(self.id) + "/responses",
+            params=params, data=data)
 
     def mark_as_done(self):
         """

@@ -82,6 +82,10 @@ class ExcusedTaskEvent(TaskEvent):
         self.message = event_data["message"]
 
 
+class ReminderTaskEvent(TaskEvent):
+    pass
+
+
 event_types = {"set-task": SetTaskEvent,
                "edit-task": EditTaskEvent,
                "archive-task": ArchiveTaskEvent,
@@ -93,7 +97,8 @@ event_types = {"set-task": SetTaskEvent,
                "mark-and-grade": MarkAndGradeTaskEvent,
                "request-resubmission": RequestedResubmissionTaskEvent,
                "confirm-task-is-complete": ConfirmCompletedTaskEvent,
-               "confirm-student-is-excused": ExcusedTaskEvent}
+               "confirm-student-is-excused": ExcusedTaskEvent,
+               "send-reminder":ReminderTaskEvent}
 
 
 class TaskEventStore:
