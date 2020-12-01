@@ -28,6 +28,7 @@ class Message(DiscretelyAuthenticatedObject):
             "mutation M { result: messages(ids: ["+str(self.id)+"], user_guid: \"" +
             self._DiscretelyAuthenticatedObject__guid+"\", new_read: " + str(read * 1) + ")")}
         requests.post(self._DiscretelyAuthenticatedObject__portal + "/_api/1.0/graphql", params=params, data=data)
+
     def archive(self):
         """
         Archives the message.
