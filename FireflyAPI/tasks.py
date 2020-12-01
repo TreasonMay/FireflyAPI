@@ -32,7 +32,7 @@ class TaskInterfaceFilter:
             self.filters.append({
                 "ownerType": "OnlySetters",
                 "page": page,
-                "pageSize": min(self.results, 50),
+                "pageSize": min((self.results - 50 * page), 50),
                 "archiveStatus": "All",
                 "completionStatus": self.status,
                 "readStatus": read_mapping[self.read],
