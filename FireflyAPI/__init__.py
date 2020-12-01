@@ -83,7 +83,8 @@ class AuthenticatedUser(AuthenticatedObject):
         params = {"ffauth_device_id": self.device_id,
                   "ffauth_secret": self.device_token}
         data = {"data": str(
-            "query Query {users(guid: \"" + self.guid +"\") { messages { from { guid, name }, sent, archived, id, single_to { guid, name }, all_recipients, read, body } } }")}
+            "query Query {users(guid: \"" + self.guid +
+            "\") { messages { from { name }, sent, archived, id, all_recipients, read, body } } }")}
         response = requests.post(
             self.portal + "/_api/1.0/graphql",
             params=params, data=data)

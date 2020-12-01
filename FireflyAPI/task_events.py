@@ -98,7 +98,7 @@ event_types = {"set-task": SetTaskEvent,
                "request-resubmission": RequestedResubmissionTaskEvent,
                "confirm-task-is-complete": ConfirmCompletedTaskEvent,
                "confirm-student-is-excused": ExcusedTaskEvent,
-               "send-reminder":ReminderTaskEvent}
+               "send-reminder": ReminderTaskEvent}
 
 
 class TaskEventStore:
@@ -129,7 +129,9 @@ class TaskEventStore:
             if account_guid == event["authorGuid"]:
                 is_student_event = True
             if event["eventType"] not in event_types:
-                warnings.warn(f"\nPlease raise an issue on the FireflyAPI GitHub repository with the following text attached (please remove any personal data): \n {json.dumps(event, indent=4, sort_keys=True)}")
+                warnings.warn(f"\nPlease raise an issue on the FireflyAPI GitHub repository"
+                              f"with the following text attached (please remove any personal data):"
+                              f" \n {json.dumps(event, indent=4, sort_keys=True)}")
             else:
                 self.events.append(event_types[event["eventType"]](event, is_student_event))
         self.events.sort(key=lambda event: event.createdTime)

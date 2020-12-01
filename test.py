@@ -10,7 +10,7 @@ ab_file.close()
 api = AuthenticatedUser(my_ab)
 print(api.auth_blob)
 for message in api.get_messages()[:6]:
-    message.unarchive()
+    # message.unarchive()
     print(message.message_text)
 #tt = api.get_timetable()
 #start = datetime(2020, 11, 20)
