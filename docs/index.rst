@@ -5,6 +5,9 @@
 
 Welcome to FireflyAPI's documentation!
 ======================================
+.. automodule:: FireflyAPI
+    :members:
+
 
 .. toctree::
    :maxdepth: 2
