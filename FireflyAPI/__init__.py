@@ -93,3 +93,6 @@ class AuthenticatedUser(AuthenticatedObject):
         for message_data in messages_data:
             messages.append(Message(self.auth_blob, message_data))
         return messages
+
+    def make_file_folder(self):
+        return files.FileFolder(self.auth_blob)

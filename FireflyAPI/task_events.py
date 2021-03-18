@@ -35,7 +35,7 @@ class UnarchiveTaskEvent(TaskEvent):
 class AddFileTaskEvent(TaskEvent):
     def __init__(self, event_data, is_student_event):
         TaskEvent.__init__(self, event_data, is_student_event)
-        self.file = files.File(event_data["file"])
+        self.file = files.File(event_data["file"], event_data["portal"])
 
 
 class CommentTaskEvent(TaskEvent):
@@ -115,7 +115,7 @@ class TaskEventStore:
     Raises:
         Warning.warning: A prompt to submit a task event that has not been seen before. Follow instructions in warning.
     """
-    def __init__(self, events_data, account_guid):
+    def __init__(self, events_data, account_guid, portal):
         self.events = []
         self.done = False
         # self.task_archived = False
@@ -133,6 +133,8 @@ class TaskEventStore:
                               f"with the following text attached (please remove any personal data):"
                               f" \n {json.dumps(event, indent=4, sort_keys=True)}")
             else:
+                if event["eventType"] == "add-file":
+                    event["portal"] = portal
                 self.events.append(event_types[event["eventType"]](event, is_student_event))
         self.events.sort(key=lambda event: event.createdTime)
         for task_event in self.events:

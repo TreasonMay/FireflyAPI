@@ -78,6 +78,9 @@ class TaskInterface(DiscretelyAuthenticatedObject):
                 break
         return all_tasks
 
+    def get_task_by_id(self, task_id):
+        return self.__get_tasks_from_ids([task_id])[0]
+
     def __get_tasks_from_ids(self, ids):
         params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
                   "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
@@ -135,7 +138,7 @@ class Task(DiscretelyAuthenticatedObject):
 
     def __load_task_details(self, task_data):
         self.event_store = task_events.TaskEventStore(task_data["recipientsResponses"][0]["responses"],
-                                                      self._DiscretelyAuthenticatedObject__guid)
+                                                      self._DiscretelyAuthenticatedObject__guid, self._DiscretelyAuthenticatedObject__portal)
         self.id = int(task_data["id"])
         self.title = task_data["title"]
         self.set_date = utils.firefly_timestamp_to_date_time(task_data["setDate"])
@@ -162,7 +165,7 @@ class Task(DiscretelyAuthenticatedObject):
         self.file_attachments = []
         if task_data["fileAttachments"] is not None:
             for file in task_data["fileAttachments"]:
-                self.file_attachments.append(files.File(file))
+                self.file_attachments.append(files.File(file, self._DiscretelyAuthenticatedObject__portal))
 
     def can_mark_as_done(self):
         """
@@ -245,3 +248,19 @@ class Task(DiscretelyAuthenticatedObject):
         if self.can_mark_as_undone():
             return self.__set_completion_status(False)
         return False
+
+    def upload_file(self, file_folder):
+        """
+        Args:
+            file_folder (FileFolder Object: The folder in which the files to be uploaded are.
+        """
+        params = {"ffauth_device_id": self._DiscretelyAuthenticatedObject__device_id,
+                  "ffauth_secret": self._DiscretelyAuthenticatedObject__device_token}
+        data = {"data": str(
+            {"event": {"type": "add-file", "folderId": file_folder.folder_id},
+             "recipient": {"guid": self._DiscretelyAuthenticatedObject__guid, "type": "user"}})}
+        requests.post(
+            self._DiscretelyAuthenticatedObject__portal + "/_api/1.0/tasks/" + str(self.id) + "/responses",
+            params=params, data=data)
+
+
